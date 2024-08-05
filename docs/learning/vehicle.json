@@ -1,0 +1,14 @@
+{
+  "type3" : {
+    "car" : "VOLVO 240 GLT",
+    "moped" : "Simson Enduro 50cc"
+  },
+  "type2" : {
+    "car" : "VOLVO 240 GLT",
+    "moped" : "Simson Enduro 50cc"
+  },
+  "type" : {
+    "car" : "VOLVO 240 GLT",
+    "moped" : "Simson Enduro 50cc"
+  }
+}
