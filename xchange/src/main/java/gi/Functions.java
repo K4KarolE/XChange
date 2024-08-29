@@ -15,14 +15,13 @@ public class Functions {
     static HashMap<String,Integer> mapJsonDetailsInteger;
     static HashMap<String,HashMap<String,Double>> mapRates;
 
-    static File jsonFileResponse = new File("./docs/learning/apiResponseExample.json");
-    static File jsonFileTime = new File("./xchange/src/main/java/gi/lastApiRequestTime.json");
+    static File jsonFile = new File("./docs/learning/apiResponse.json");
     static ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public static HashMap<String,String> getMapJsonDetails() {
+    public static HashMap<String,String> getMapJsonDetailsString() {
         try {
-            jsonNode = objectMapper.readTree(jsonFileResponse);
+            jsonNode = objectMapper.readTree(jsonFile);
             mapJsonDetails = objectMapper.convertValue(jsonNode, HashMap.class);
             
         } catch (IOException e) {System.out.println("ERROR: Read tree-file");}
@@ -33,7 +32,7 @@ public class Functions {
 
     public static HashMap<String,Integer> getMapJsonDetailsInteger() {
         try {
-            jsonNode = objectMapper.readTree(jsonFileResponse);
+            jsonNode = objectMapper.readTree(jsonFile);
             mapJsonDetailsInteger = objectMapper.convertValue(jsonNode, HashMap.class);
             
         } catch (IOException e) {System.out.println("ERROR: Read tree-file");}
@@ -44,7 +43,7 @@ public class Functions {
 
     public static HashMap<String,HashMap<String,Double>> getMapRates() {
         try {
-            jsonNode = objectMapper.readTree(jsonFileResponse);
+            jsonNode = objectMapper.readTree(jsonFile);
             mapRates = objectMapper.convertValue(jsonNode, HashMap.class);
             
         } catch (IOException e) {System.out.println("ERROR: Read tree-file");}
@@ -70,8 +69,8 @@ public class Functions {
     }
 
 
-    public static Integer lastUpdateTimeUnix() {
-        return getMapJsonDetailsInteger().get("time_last_update_unix");
+    public static Integer nextUpdateTimeUnix() {
+        return getMapJsonDetailsInteger().get("time_next_update_unix");
     }
 
 
@@ -81,11 +80,10 @@ public class Functions {
 
 
     public static boolean canGetNewApiRequest() {
-        // Check if 24hrs passed since last update of rates
         Integer currentTime = (int)Instant.now().getEpochSecond();
-        Integer timeDiff = currentTime - lastUpdateTimeUnix();
+        Integer nextApiUpdate =  nextUpdateTimeUnix();
         
-        if (timeDiff > 86400) {
+        if (currentTime > nextApiUpdate) {
             return true;
         }
         else {
