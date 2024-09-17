@@ -1,6 +1,10 @@
-package learning;
+/*
+    Class used in the ReadJSON to parse resources / car.json
+ */
 
-public class Car {
+package karole;
+
+public class Class_Car {
     private String brand = null;
     private float engineSize = 0;
 
@@ -10,3 +14,4 @@ public class Car {
     public void setBrand(String brand) { this.brand = brand; }
     public void setEngineSize(float engineSize) { this.engineSize = engineSize; }
 }
+

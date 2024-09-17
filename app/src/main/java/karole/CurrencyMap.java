@@ -18,7 +18,7 @@
         print(f'hashMap.put("{key}","{item}");')
  */
 
-package gi;
+package karole;
 
 import java.util.HashMap;
 

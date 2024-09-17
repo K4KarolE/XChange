@@ -1,4 +1,4 @@
-package gi;
+package karole;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,8 +29,8 @@ public class Functions {
     static HashMap<String,Integer> mapJsonDetailsInteger;
     static HashMap<String,HashMap<String,Double>> mapRates;
 
-    static File jsonFileApi = new File("./docs/apiResponse.json");
-    static File jsonFileLastUsedCurrencies = new File("./docs/lastUsedCurrencies.json");
+    static File jsonFileApi = new File("./app/src/main/resources/apiResponse.json");
+    static File jsonFileLastUsedCurrencies = new File("./app/src/main/resources/lastUsedCurrencies.json");
     static ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -139,7 +139,12 @@ public class Functions {
 
 
 
-    public static void main(String[] args) {
+    public static void appStartsGroupedActions() {
+        /*
+         * Checking if existing JSON is out of date
+         * If yes, new API request
+         * Saving the valid response as JSON  
+         */
 
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         generateJsonMaps();

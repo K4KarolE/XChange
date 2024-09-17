@@ -1,13 +1,13 @@
 /* 
-    - for homogen, one deep json
-    - if it is mixed (1, 2, .. deep) the mapping is not suitable
-    - json file will be saved with an descending keys: 
+    - For homogen, one deep json
+    - If it is mixed (1, 2, .. deep) the mapping is not suitable
+    - Json file will be saved with descending keys:
         "key3":{},
         "key2":{},
         "key":{}
  */
 
-package learning;
+package karole;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,10 +24,8 @@ public class WriteJSON_Nested_Map {
     {   
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // to readable format
+        File file = new File("./learning/src/main/resources/vehicles.json");
 
-        File file = new File("./docs/learning/vehicle.json");
-        
-        
         try {
             // READ FILE - CONVERT JSONNODE TO MAP            
             JsonNode jsonNode = objectMapper.readTree(file);
@@ -36,16 +34,16 @@ public class WriteJSON_Nested_Map {
 
 
             // UPDATE THE MAP
-            String car = resultMap.get("type").get("car");
+            String car = resultMap.get("type1").get("car");
             String newCarTitle = car + "+";
 
             System.out.println(car + "  >>  " +  newCarTitle);
-            resultMap.get("type").put("car", newCarTitle);
+            resultMap.get("type1").put("car", newCarTitle);
     
 
             // CONVERT MAP BACK TO JSONNODE - SAVE TO FILE
-            JsonNode tosave = objectMapper.convertValue(resultMap, JsonNode.class);
-            objectMapper.writeValue(file, tosave);
+            JsonNode toSave = objectMapper.convertValue(resultMap, JsonNode.class);
+            objectMapper.writeValue(file, toSave);
 
         }
         catch (IOException e) {

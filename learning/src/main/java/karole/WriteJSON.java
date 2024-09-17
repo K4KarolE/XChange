@@ -1,9 +1,11 @@
 /* 
     Cheers Jakob!
     https://jenkov.com/tutorials/java-json/jackson-objectmapper.html
+
+    Using the Class_Car class to read and write resources / car.json
  */
 
-package learning;
+package karole;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class WriteJSON 
 {
-    static Car car = new Car();
+    static Class_Car car = new Class_Car();
 
     static int printCounter = 1;
 
@@ -35,17 +37,19 @@ public class WriteJSON
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // JSON INDENTION 
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        
+
+        System.out.println("Original Class_Car class values");
         printCarProps();
         
-        File file = new File("./docs/learning/car.json");
+        File file = new File("./learning/src/main/resources/car.json");
         
         // READ
         try {
-            car = objectMapper.readValue(file, Car.class);
+            car = objectMapper.readValue(file, Class_Car.class);
+            System.out.println("Updated Class values from JSON");
             printCarProps();
         }
-        catch (IOException e) {     
+        catch (IOException e) {
             e.printStackTrace();     
         }
         
@@ -56,10 +60,10 @@ public class WriteJSON
             car.setEngineSize(car.getEngineSize() + 1);
             objectMapper.writeValue(file, car);
         }
-        catch (IOException e) {     
+        catch (IOException e) {
             e.printStackTrace();     
         }
-
+        System.out.println("New Class values + JSON updated");
         printCarProps();
     }
 }

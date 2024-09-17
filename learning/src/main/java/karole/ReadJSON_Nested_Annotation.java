@@ -1,4 +1,8 @@
- package learning;
+/*
+ * Using the Class_Vehicles to load the data from resources / vehicles.json
+ */
+
+package karole;
 
  import java.io.File;
  import java.io.IOException;
@@ -8,14 +12,14 @@
  
  public class ReadJSON_Nested_Annotation 
  {
-    static Vehicle car = new Vehicle();
+    static Class_Vehicles vehicles = new Class_Vehicles();
 
     static int printCounter = 1;
 
     static void printCarProps () {
         System.out.println("# " + printCounter);
-        System.out.println(car.getCar());
-        System.out.println(car.getMoped() + "\n");
+        System.out.println(vehicles.getCar());
+        System.out.println(vehicles.getMoped() + "\n");
         printCounter++;
     }
 
@@ -26,19 +30,16 @@
 
         // Avoid unmatched JSON-Car class field(s): randomInfo
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        
-        printCarProps();
 
-        File file = new File("./docs/learning/vehicle.json");
+        File file = new File("./learning/src/main/resources/vehicles.json");
         
         try {
-            car = objectMapper.readValue(file, Vehicle.class);
+            printCarProps();
+            vehicles = objectMapper.readValue(file, Class_Vehicles.class);
             printCarProps();
         }
         catch (IOException e) {     
             e.printStackTrace();
         }
-
-        printCarProps();
     }
 }

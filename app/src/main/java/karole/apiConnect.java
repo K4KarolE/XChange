@@ -1,5 +1,4 @@
-
-package gi;
+package karole;
 
 import java.io.IOException;
 import java.net.URI;

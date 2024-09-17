@@ -1,0 +1,14 @@
+{
+  "type3" : {
+    "car" : "Ford",
+    "moped" : "Yamaha 500cc"
+  },
+  "type2" : {
+    "car" : "BMW",
+    "moped" : "Honda 250cc"
+  },
+  "type1" : {
+    "car" : "VOLVO",
+    "moped" : "Simson Enduro 50cc"
+  }
+}

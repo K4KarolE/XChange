@@ -4,7 +4,7 @@ https://youtu.be/MAw5Ku1OVFA?si=rJ8SeIWUDVZdu_cN
  */
 
 
-package learning;
+package karole;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class apiCall {
     static ObjectMapper objectMapper = new ObjectMapper();
     static JsonNode jsonNode;
     
-    static File file = new File("./docs/learning/apiResponse.json");
+    static File file = new File("./learning/src/main/resources/apiResponse.json");
 
 
     static String apiCallGet() throws IOException, InterruptedException {
