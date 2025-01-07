@@ -9,6 +9,16 @@ public class App
     public static void main( String[] args )
     {
         fs.appStartsGroupedActions();
-        System.out.println(fs.canGetNewApiRequest());
+        fs.generateLastUsedCurrencies();
+        
+        // fs.saveLastUsedCurrenciesGrouped("EUR", "USD");
+        fs.saveLastUsedCurrenciesGrouped("GBP", "HUF");
+        
+        
+        fs.generateLastUsedCurrencies();
+        fs.generateRates();
+
+        System.out.println(fs.rateFrom + " " + fs.rateTo);
+
     }
 }

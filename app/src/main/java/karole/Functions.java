@@ -3,32 +3,28 @@ package karole;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 public class Functions {
 
     static apiConnect apiCall = new apiConnect();
     static JsonNode jsonNodeApiResponse;
-    static HashMap<String,String> mapJsonApiResponsString;
-    static HashMap<String,Integer> mapJsonApiResponsInteger;
-    static HashMap<String,HashMap<String,Double>> mapRatesApiRespons;
+
+    static JsonNode jsonNodeJSON;
 
     static JsonNode jsonNodeLastUsedCurrencies;
-    static HashMap<String,String> mapJsonLastUsedCurrencies;
+    static ObjectNode objectNodeLastUsedCurrencies;
     static String lastUsedCurrFrom;
     static String lastUsedCurrTo;
-    
-    
-    static JsonNode jsonNodeJSON;
-    static HashMap<String,String> mapJsonDetailsString;
-    static HashMap<String,Integer> mapJsonDetailsInteger;
-    static HashMap<String,HashMap<String,Double>> mapRates;
 
+    public static Double rateFrom;
+    public static Double rateTo; 
+    
     static File jsonFileApi = new File("./app/src/main/resources/apiResponse.json");
     static File jsonFileLastUsedCurrencies = new File("./app/src/main/resources/lastUsedCurrencies.json");
     static ObjectMapper objectMapper = new ObjectMapper();
@@ -47,66 +43,58 @@ public class Functions {
     /*
      * LAST USED CURRENCIES
      */
-    static HashMap<String,String> getMapLastUsedCurrencies() {
-        return objectMapper.convertValue(jsonNodeLastUsedCurrencies, HashMap.class);
-    }
-
-
-    static void getLastUsedCurrencies() {
+    static void generateLastUsedCurrencies() {
         jsonNodeLastUsedCurrencies = generateJsonNode(jsonFileLastUsedCurrencies, jsonNodeLastUsedCurrencies);
-        mapJsonLastUsedCurrencies = getMapLastUsedCurrencies();
-        lastUsedCurrFrom = mapJsonLastUsedCurrencies.get("from");
-        lastUsedCurrTo = mapJsonLastUsedCurrencies.get("to");
+        lastUsedCurrFrom = jsonNodeLastUsedCurrencies.get("from").asText();
+        lastUsedCurrTo = jsonNodeLastUsedCurrencies.get("to").asText();
     }
 
 
-
-
-    /*
-     * MAPS CREATION FROM SAVED JSON
-     */
-    static HashMap<String,String> getMapJsonDetailsString(JsonNode jsonNode) {
-        return objectMapper.convertValue(jsonNode, HashMap.class);
+    static void writeToObjectNode(String currencyFrom, String currencyTo) {
+        objectNodeLastUsedCurrencies = (ObjectNode) jsonNodeLastUsedCurrencies;
+        objectNodeLastUsedCurrencies.put("from", currencyFrom);
+        objectNodeLastUsedCurrencies.put("to", currencyTo);
     }
 
 
-    static HashMap<String,Integer> getMapJsonDetailsInteger(JsonNode jsonNode) {
-        return objectMapper.convertValue(jsonNode, HashMap.class);
-    }
-
-
-    static HashMap<String,HashMap<String,Double>> getMapRates(JsonNode jsonNode) {
-        return objectMapper.convertValue(jsonNode, HashMap.class);
-    }
-
-
-    public static void generateJsonMaps() {
-        jsonNodeJSON = generateJsonNode(jsonFileApi, jsonNodeJSON);
-        mapJsonDetailsString = getMapJsonDetailsString(jsonNodeJSON);
-        mapJsonDetailsInteger = getMapJsonDetailsInteger(jsonNodeJSON);
-        mapRates = getMapRates(jsonNodeJSON);
+    static void writeJson() {
+        try {
+            objectMapper.writeValue(jsonFileLastUsedCurrencies, objectNodeLastUsedCurrencies);
+        }
+        catch (Exception e) {System.out.println("\nERROR: Could not write JSON file.\n");}
     }
 
     
-    public static String lastUpdateTimeUtc() {
-        String fullTime = mapJsonDetailsString.get("time_last_update_utc");
-        return fullTime.substring(0, 25);
+    static void saveLastUsedCurrenciesGrouped(String currencyFrom, String currencyTo) {
+        writeToObjectNode(currencyFrom, currencyTo);
+        writeJson();
     }
 
 
-    public static Integer nextUpdateTimeUnix() {
-        return mapJsonDetailsInteger.get("time_next_update_unix");
+
+     /*
+     * TIME, RATES
+     */
+    public static String getLastUpdateTimeUtc() {
+        String fullTime = jsonNodeJSON.get("time_last_update_utc").toString();
+        return fullTime.substring(0, 16);
     }
 
 
-    public static Double getRate(String currencyCode) {
-        return mapRates.get("rates").get(currencyCode);
+    public static Integer getNextUpdateTimeUnix() {
+        return jsonNodeJSON.get("time_next_update_unix").asInt();
+    }
+
+
+    public static void generateRates() {
+        rateFrom = jsonNodeJSON.get("rates").get(lastUsedCurrFrom).asDouble();
+        rateTo = jsonNodeJSON.get("rates").get(lastUsedCurrTo).asDouble();
     }
 
 
     public static boolean canGetNewApiRequest() {
         Integer currentTime = (int)Instant.now().getEpochSecond();
-        Integer nextApiUpdate =  nextUpdateTimeUnix();
+        Integer nextApiUpdate =  getNextUpdateTimeUnix();
         
         if (currentTime > nextApiUpdate) {
             return true;
@@ -117,18 +105,8 @@ public class Functions {
     }
 
 
-    /*
-     *  API RESPONSE
-     */
-    public static void generateApiResponseMaps() {
-        mapJsonApiResponsString = getMapJsonDetailsString(jsonNodeApiResponse);
-        mapJsonApiResponsInteger = getMapJsonDetailsInteger(jsonNodeApiResponse);
-        mapRatesApiRespons = getMapRates(jsonNodeApiResponse);
-    }
-
-
     public static boolean isResponseValid() {
-        String result = mapJsonApiResponsString.get("result");
+        String result = jsonNodeApiResponse.get("result").toString();
         if (result.equals("success")) {
             return true;
         }
@@ -136,7 +114,6 @@ public class Functions {
             return false;
         }
     }
-
 
 
     public static void appStartsGroupedActions() {
@@ -147,22 +124,23 @@ public class Functions {
          */
 
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        generateJsonMaps();
-
+        jsonNodeJSON = generateJsonNode(jsonFileApi, jsonNodeJSON); // from the last used json 
 
         if (canGetNewApiRequest()) {
             jsonNodeApiResponse = apiCall.generateJsonNode();
-            
-            if (jsonNodeApiResponse != null) {
-                generateApiResponseMaps();
-            }
 
-            if (isResponseValid()) {
-                try {
-                    objectMapper.writeValue(jsonFileApi, jsonNodeApiResponse);
-                    generateJsonMaps();
+            if (jsonNodeApiResponse != null) {
+            
+                if (isResponseValid()) {
+                    try {
+                        objectMapper.writeValue(jsonFileApi, jsonNodeApiResponse);
+                        jsonNodeJSON = jsonNodeApiResponse;
+                    }
+                    catch (Exception e) {System.out.println("ERROR: Could not write API response to file.");}
                 }
-                catch (Exception e) {System.out.println("ERROR: Could not write API response to file.");}
+            }
+            else {
+                System.out.println("ERROR: No API response received.");
             }
         }
     }
