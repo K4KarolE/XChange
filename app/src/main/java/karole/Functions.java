@@ -106,7 +106,7 @@ public class Functions {
 
 
     public static boolean isResponseValid() {
-        String result = jsonNodeApiResponse.get("result").toString();
+        String result = jsonNodeApiResponse.get("result").asText();
         if (result.equals("success")) {
             return true;
         }
@@ -126,23 +126,22 @@ public class Functions {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         jsonNodeJSON = generateJsonNode(jsonFileApi, jsonNodeJSON); // from the last used json 
 
+
         if (canGetNewApiRequest()) {
             jsonNodeApiResponse = apiCall.generateJsonNode();
-
-            if (jsonNodeApiResponse != null) {
-            
-                if (isResponseValid()) {
-                    try {
-                        objectMapper.writeValue(jsonFileApi, jsonNodeApiResponse);
-                        jsonNodeJSON = jsonNodeApiResponse;
-                    }
-                    catch (Exception e) {System.out.println("ERROR: Could not write API response to file.");}
+        
+            if (jsonNodeApiResponse != null && isResponseValid()) {
+         
+                try {
+                    objectMapper.writeValue(jsonFileApi, jsonNodeApiResponse);
+                    jsonNodeJSON = jsonNodeApiResponse;
                 }
+                catch (Exception e) {System.out.println("ERROR: Could not write API response to file.");}
             }
+            
             else {
                 System.out.println("ERROR: No API response received.");
             }
         }
     }
-
 }
