@@ -24,7 +24,7 @@ import java.util.HashMap;
 
 public class CurrencyMap {
     
-    public static HashMap<String, String> createCurrencyMap() {
+    static HashMap<String, String> createCurrencyMap() {
         HashMap<String, String> hashMap = new HashMap<>();
         hashMap.put("United Arab Emirates - AED","AED");
         hashMap.put("Afghanistan - AFN","AFN");

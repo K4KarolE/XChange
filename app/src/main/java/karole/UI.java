@@ -20,9 +20,9 @@ public class UI {
     static Functions fs = new Functions();
     static JFrame frame = new JFrame();
     static JTextField insertField = new JTextField();
-    static JLabel label_result = new JLabel("0.0");
+    static JLabel label_result = new JLabel("---");
     
-    static HashMap<String,String> mapCurrency = new CurrencyMap().createCurrencyMap();
+    static HashMap<String,String> mapCurrency = CurrencyMap.createCurrencyMap();
 
     static JComboBox<String> combo_box_unit_from;
     static JComboBox<String> combo_box_unit_to;
@@ -39,12 +39,13 @@ public class UI {
     
     static String workingDir = Path.of("").toAbsolutePath().toString();
     static String imgPath = workingDir + "./app/src/main/resources/frame_icon.png";
+    static JLabel[] historicCurrLabel = new JLabel[5];
 
 
-    public static void generateWindow() {
+    static void generateWindow() {
 
-        fs.appStartsGroupedActions();
-        fs.generateLastUsedCurrencies();
+        Functions.generateLastUsedCurrencies();
+        Functions.appStartsGroupedActions();
 
 
         // COMBO BOX OPTIONS CREATION
@@ -65,7 +66,6 @@ public class UI {
         frame.setBounds(700,500,600,500);
         frame.getContentPane().setBackground(new java.awt.Color(243, 243, 243));
         frame.setResizable(false);
-        frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
@@ -91,7 +91,10 @@ public class UI {
         combo_box_unit_to.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                updateLastUsedCurrs();
+                Functions.generateRatesFromNodes();
                 updateResultAction();
+                updateHistoricCurrLabels();
             }
         });
             
@@ -99,7 +102,10 @@ public class UI {
         combo_box_unit_from.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                updateLastUsedCurrs();
+                Functions.generateRatesFromNodes();
                 updateResultAction();
+                updateHistoricCurrLabels();
             }
         });
 
@@ -131,7 +137,44 @@ public class UI {
         for (Component widget : widgets_array) {
            frame.add(widget);
         }
+
+    
+        for (int i = 0; i<5; i++) {
+
+            int gap = 30;
+            Double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
+            String toDisplay = Functions.timeLastUpdateUtc[i] + rate;
+
+            historicCurrLabel[i] = new JLabel(toDisplay);
+            historicCurrLabel[i].setBounds(xBase, 200 + gap*i, widgetWidth, widgetHeight);
+            frame.add(historicCurrLabel[i]);
+        }
+
+        frame.setVisible(true);
+
+
     }
+
+    static void updateHistoricCurrLabels() {
+   
+        for (int i = 0; i<5; i++) {
+
+            Double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
+            String toDisplay = Functions.timeLastUpdateUtc[i] + rate;
+            historicCurrLabel[i].setText(toDisplay);
+        }
+
+
+    }
+
+    static void updateLastUsedCurrs() {
+        selectedComboBoxFrom = combo_box_unit_from.getSelectedItem().toString();
+        selectedComboBoxTo = combo_box_unit_to.getSelectedItem().toString();
+        Functions.lastUsedCurrFrom = mapCurrency.get(selectedComboBoxFrom);
+        Functions.lastUsedCurrTo = mapCurrency.get(selectedComboBoxTo);
+    }
+
+
 
 
     static void updateResultAction() {
@@ -148,15 +191,12 @@ public class UI {
             catch (NumberFormatException e) {}
             
             if (fieldValueFrom != null) {
-                selectedComboBoxFrom = combo_box_unit_from.getSelectedItem().toString();
-                selectedComboBoxTo = combo_box_unit_to.getSelectedItem().toString();
-                fs.lastUsedCurrFrom = mapCurrency.get(selectedComboBoxFrom);
-                fs.lastUsedCurrTo = mapCurrency.get(selectedComboBoxTo);
-                fs.generateRates();
-
-                resultValue = fieldValueFrom / fs.rateFrom * fs.rateTo;
-                label_result.setText(resultValue + "  " + fs.lastUsedCurrTo);
+                resultValue = fieldValueFrom / Functions.ratesFrom[0] * Functions.ratesTo[0];
+                label_result.setText(resultValue + "  " + Functions.lastUsedCurrTo);
             }
+        else {
+            label_result.setText("0.0  " + Functions.lastUsedCurrTo);
+        }
         }
     }
 }
