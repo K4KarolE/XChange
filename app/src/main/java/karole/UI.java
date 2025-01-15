@@ -11,13 +11,15 @@ import java.awt.Image;
 import java.awt.Component;
 import java.awt.Font;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static java.lang.Math.abs;
+
 public class UI {
 
-    static Functions fs = new Functions();
     static JFrame frame = new JFrame();
     static JTextField insertField = new JTextField();
     static JLabel label_result = new JLabel("---");
@@ -30,8 +32,9 @@ public class UI {
     static String selectedComboBoxFrom;
     static String selectedComboBoxTo;
     static Double fieldValueFrom;
-    static Double resultValue;
+    static Double resultValueRaw;
     static String insertFieldText;
+    static DecimalFormat decFormat = new java.text.DecimalFormat("0.##E0");
 
     static Font label_font_style = new Font("Times New Roman", Font.PLAIN, 20);
     static Font insertFieldFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
@@ -60,10 +63,12 @@ public class UI {
 
         // FRAME
         Image icon = Toolkit.getDefaultToolkit().getImage(imgPath);
+        int frameWidth = 600;
+        int frameHeight = 500;
         frame.setIconImage(icon);
         frame.setTitle("XChange");
         frame.setLayout(null);
-        frame.setBounds(700,500,600,500);
+        frame.setBounds(700,500,frameWidth,frameHeight);
         frame.getContentPane().setBackground(new java.awt.Color(243, 243, 243));
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -125,7 +130,7 @@ public class UI {
         insertField.setBounds(xBase, yBase, insertFieldWidth, widgetHeight + 2);
         combo_box_unit_from.setBounds(xUnitFromCB, yBase, widgetWidth,widgetHeight);
         combo_box_unit_to.setBounds(xUnitToCB, yBase, widgetWidth,widgetHeight);
-        label_result.setBounds(xBase + 2, yBase + widgetHeight, 200,widgetHeight);
+        label_result.setBounds(xBase + 2, yBase + widgetHeight, frameWidth-xBase*2, widgetHeight);
 
         Component[] widgets_array = {
             label_result,
@@ -142,8 +147,8 @@ public class UI {
         for (int i = 0; i<5; i++) {
 
             int gap = 30;
-            Double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
-            String toDisplay = Functions.timeLastUpdateUtc[i] + rate;
+            double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
+            String toDisplay = Functions.timeLastUpdateUtc[i] + generateHistoricRateToDisplay(rate);
 
             historicCurrLabel[i] = new JLabel(toDisplay);
             historicCurrLabel[i].setBounds(xBase, 200 + gap*i, widgetWidth, widgetHeight);
@@ -155,17 +160,6 @@ public class UI {
 
     }
 
-    static void updateHistoricCurrLabels() {
-   
-        for (int i = 0; i<5; i++) {
-
-            Double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
-            String toDisplay = Functions.timeLastUpdateUtc[i] + rate;
-            historicCurrLabel[i].setText(toDisplay);
-        }
-
-
-    }
 
     static void updateLastUsedCurrs() {
         selectedComboBoxFrom = combo_box_unit_from.getSelectedItem().toString();
@@ -175,28 +169,73 @@ public class UI {
     }
 
 
+    static String customFormat(String pattern, double value ) {
+        DecimalFormat myFormatter = new DecimalFormat(pattern);
+        return myFormatter.format(value);
+    }
+
+
+    static String generateResultValueToDisplay(double resultValueRaw) {
+        if (resultValueRaw >= 1) {
+            return customFormat("###,###.00", resultValueRaw);
+        }
+        else if (resultValueRaw > 0.000_001) {
+            return customFormat("#.#######", resultValueRaw);
+        }
+        else {
+            return decFormat.format(resultValueRaw);
+        }
+    }
+
+
+    static String generateHistoricRateToDisplay(double rate) {
+        if (rate >= 1 && rate < 10_000) {
+            return customFormat("###,###.00", rate);
+        }
+        else if (rate > 0.000_01) {
+            return customFormat("#.######", rate);
+        }
+        else {
+            return decFormat.format(rate);
+        }
+    }
+
+
+    static void updateHistoricCurrLabels() {
+
+        for (int i = 0; i<5; i++) {
+
+            double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
+            String toDisplay = Functions.timeLastUpdateUtc[i] + generateHistoricRateToDisplay(rate);
+            historicCurrLabel[i].setText(toDisplay);
+        }
+    }
 
 
     static void updateResultAction() {
 
        insertFieldText = insertField.getText().trim();
 
-        if (insertFieldText.length() != 0) {
+        if (!insertFieldText.isEmpty()) {
 
             fieldValueFrom = null;
-        
+
             try {
-                fieldValueFrom = Double.parseDouble(insertFieldText);
+                fieldValueFrom = abs(Double.parseDouble(insertFieldText));
+            } catch (NumberFormatException e) {
+                System.out.println("Invaild value!");
             }
-            catch (NumberFormatException e) {}
-            
-            if (fieldValueFrom != null) {
-                resultValue = fieldValueFrom / Functions.ratesFrom[0] * Functions.ratesTo[0];
-                label_result.setText(resultValue + "  " + Functions.lastUsedCurrTo);
+
+            if (fieldValueFrom != null && fieldValueFrom != 0) {
+                resultValueRaw = fieldValueFrom / Functions.ratesFrom[0] * Functions.ratesTo[0];
+                label_result.setText(generateResultValueToDisplay(resultValueRaw) + "  " + Functions.lastUsedCurrTo);
+            } else {
+                label_result.setText("0.0" + "  " + Functions.lastUsedCurrTo);
             }
+        }
         else {
             label_result.setText("0.0  " + Functions.lastUsedCurrTo);
         }
         }
     }
-}
+
