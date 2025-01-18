@@ -36,8 +36,9 @@ public class UI {
     static String insertFieldText;
     static DecimalFormat decFormat = new java.text.DecimalFormat("0.##E0");
 
-    static Font label_font_style = new Font("Times New Roman", Font.PLAIN, 20);
+    static Font resultValueFontStyle = new Font("Times New Roman", Font.PLAIN, 20);
     static Font insertFieldFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
+    static Font historicCurrFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
 
     
     static String workingDir = Path.of("").toAbsolutePath().toString();
@@ -75,6 +76,7 @@ public class UI {
 
 
         insertField.setFont(insertFieldFontStyle);
+        insertField.setHorizontalAlignment(JTextField.RIGHT);
         insertField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -93,10 +95,12 @@ public class UI {
         
 
         combo_box_unit_to = new JComboBox<>(combo_box_options);
+        combo_box_unit_to.setSelectedIndex(Functions.lastUsedCurrToIndex);
         combo_box_unit_to.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateLastUsedCurrs();
+                Functions.saveLastUsedCurrenciesJson();
                 Functions.generateRatesFromNodes();
                 updateResultAction();
                 updateHistoricCurrLabels();
@@ -104,10 +108,12 @@ public class UI {
         });
             
         combo_box_unit_from = new JComboBox<>(combo_box_options);
+        combo_box_unit_from.setSelectedIndex(Functions.lastUsedCurrFromIndex);
         combo_box_unit_from.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateLastUsedCurrs();
+                Functions.saveLastUsedCurrenciesJson();
                 Functions.generateRatesFromNodes();
                 updateResultAction();
                 updateHistoricCurrLabels();
@@ -115,7 +121,7 @@ public class UI {
         });
 
 
-        label_result.setFont(label_font_style);
+        label_result.setFont(resultValueFontStyle);
         
         int widgetWidth = 180;
         int widgetHeight = 30;
@@ -148,10 +154,11 @@ public class UI {
 
             int gap = 30;
             double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
-            String toDisplay = Functions.timeLastUpdateUtc[i] + generateHistoricRateToDisplay(rate);
+            String toDisplay = Functions.timeLastUpdateUtc[i] + "  " + generateHistoricRateToDisplay(rate);
 
             historicCurrLabel[i] = new JLabel(toDisplay);
-            historicCurrLabel[i].setBounds(xBase, 200 + gap*i, widgetWidth, widgetHeight);
+            historicCurrLabel[i].setFont(historicCurrFontStyle);
+            historicCurrLabel[i].setBounds(xBase, 130 + gap*i, widgetWidth, widgetHeight);
             frame.add(historicCurrLabel[i]);
         }
 
@@ -166,6 +173,8 @@ public class UI {
         selectedComboBoxTo = combo_box_unit_to.getSelectedItem().toString();
         Functions.lastUsedCurrFrom = mapCurrency.get(selectedComboBoxFrom);
         Functions.lastUsedCurrTo = mapCurrency.get(selectedComboBoxTo);
+        Functions.lastUsedCurrFromIndex = combo_box_unit_from.getSelectedIndex();
+        Functions.lastUsedCurrToIndex = combo_box_unit_to.getSelectedIndex();
     }
 
 

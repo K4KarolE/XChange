@@ -7,6 +7,7 @@ import java.time.Instant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 public class Functions {
@@ -15,9 +16,12 @@ public class Functions {
 
     static JsonNode jsonNodeLastUsedCurrencies;
     static String lastUsedCurrFrom;
+    static int lastUsedCurrFromIndex;
     static String lastUsedCurrTo;
+    static int lastUsedCurrToIndex;
 
     static File jsonFileLastUsedCurrencies = new File("./app/src/main/resources/lastUsedCurrencies.json");
+    static ObjectNode LastUsedCurrenciesObjectNode;
     static ObjectMapper objectMapper = new ObjectMapper();
 
     static File[] jsonFiles = new File[5];
@@ -60,12 +64,30 @@ public class Functions {
     }
 
 
-    public static void generateLastUsedCurrencies() {
+    static void generateLastUsedCurrencies() {
         try {
             jsonNodeLastUsedCurrencies = objectMapper.readTree(jsonFileLastUsedCurrencies);
         } catch (IOException e) {System.out.println("ERROR: Read tree-file");}
         lastUsedCurrFrom = jsonNodeLastUsedCurrencies.get("from").asText();
         lastUsedCurrTo = jsonNodeLastUsedCurrencies.get("to").asText();
+        lastUsedCurrFromIndex = jsonNodeLastUsedCurrencies.get("from_index").asInt();
+        lastUsedCurrToIndex = jsonNodeLastUsedCurrencies.get("to_index").asInt();
+    }
+
+
+    static void saveLastUsedCurrenciesJson() {
+        LastUsedCurrenciesObjectNode = (ObjectNode) jsonNodeLastUsedCurrencies;
+        LastUsedCurrenciesObjectNode.put("from", lastUsedCurrFrom);
+        LastUsedCurrenciesObjectNode.put("to", lastUsedCurrTo);
+        LastUsedCurrenciesObjectNode.put("from_index", lastUsedCurrFromIndex);
+        LastUsedCurrenciesObjectNode.put("to_index", lastUsedCurrToIndex);
+
+        try {
+            objectMapper.writeValue(jsonFileLastUsedCurrencies, LastUsedCurrenciesObjectNode);
+        }
+        catch (Exception e) {System.out.println(
+                "ERROR: Could not write selected currencies to JSON file.");
+        }
     }
 
 

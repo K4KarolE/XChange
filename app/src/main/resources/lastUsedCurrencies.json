@@ -1,4 +1,6 @@
 {
-  "from" : "EUR",
-  "to" : "HUF"
+  "from" : "GBP",
+  "from_index" : 151,
+  "to" : "HUF",
+  "to_index" : 61
 }
