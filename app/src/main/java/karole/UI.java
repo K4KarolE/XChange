@@ -22,7 +22,7 @@ public class UI {
 
     static JFrame frame = new JFrame();
     static JTextField insertField = new JTextField();
-    static JLabel label_result = new JLabel("---");
+    static JLabel label_result = new JLabel();
     
     static HashMap<String,String> mapCurrency = CurrencyMap.createCurrencyMap();
 
@@ -40,10 +40,29 @@ public class UI {
     static Font insertFieldFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
     static Font historicCurrFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
 
+    static String historicGapBetweenDateValue = ("     ");
+    static Double[] historicRates = new Double[5];
     
     static String workingDir = Path.of("").toAbsolutePath().toString();
-    static String imgPath = workingDir + "./app/src/main/resources/frame_icon.png";
+    static String imgPathWindowIcon = workingDir + "/app/src/main/resources/frame_icon.png";
     static JLabel[] historicCurrLabel = new JLabel[5];
+
+
+    // Arrows or hyphen between the
+    // historic date and rates
+    static int imgSizeArrows = 15;
+    static JLabel[] historicImgArrow = new JLabel[5];
+    static ImageIcon generateIcon(String imgName) {
+        String filePath = workingDir + "/app/src/main/resources/" + imgName+ ".png";
+        ImageIcon iconRaw = new ImageIcon(filePath);
+        Image image = iconRaw.getImage();
+        Image newImage = image.getScaledInstance(imgSizeArrows, imgSizeArrows,  Image.SCALE_SMOOTH);
+        return new ImageIcon(newImage);
+    }
+    static ImageIcon iconUp = generateIcon("arrow_up");
+    static ImageIcon iconDown = generateIcon("arrow_down");
+    static ImageIcon iconHyphen = generateIcon("arrow_hyphen");
+
 
 
     static void generateWindow() {
@@ -63,7 +82,7 @@ public class UI {
 
 
         // FRAME
-        Image icon = Toolkit.getDefaultToolkit().getImage(imgPath);
+        Image icon = Toolkit.getDefaultToolkit().getImage(imgPathWindowIcon);
         int frameWidth = 600;
         int frameHeight = 500;
         frame.setIconImage(icon);
@@ -77,6 +96,7 @@ public class UI {
 
         insertField.setFont(insertFieldFontStyle);
         insertField.setHorizontalAlignment(JTextField.RIGHT);
+        insertField.setText("1");
         insertField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -85,14 +105,14 @@ public class UI {
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                updateResultAction(); 
+                updateResultAction();
             }
 
             @Override
-            public void changedUpdate(DocumentEvent e) { }          
-            });
+            public void changedUpdate(DocumentEvent e) { }
+        });
 
-        
+
 
         combo_box_unit_to = new JComboBox<>(combo_box_options);
         combo_box_unit_to.setSelectedIndex(Functions.lastUsedCurrToIndex);
@@ -104,6 +124,7 @@ public class UI {
                 Functions.generateRatesFromNodes();
                 updateResultAction();
                 updateHistoricCurrLabels();
+                updateHistoricArrows();
             }
         });
             
@@ -117,13 +138,16 @@ public class UI {
                 Functions.generateRatesFromNodes();
                 updateResultAction();
                 updateHistoricCurrLabels();
+                updateHistoricArrows();
             }
         });
 
 
         label_result.setFont(resultValueFontStyle);
-        
+        updateResultAction();
+
         int widgetWidth = 180;
+        int historicDataWidth = 210;
         int widgetHeight = 30;
         int xBase = 40;
         int yBase = 40;
@@ -149,22 +173,45 @@ public class UI {
            frame.add(widget);
         }
 
+
     
         for (int i = 0; i<5; i++) {
 
             int gap = 30;
+            int gapArrow = 100;
             double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
-            String toDisplay = Functions.timeLastUpdateUtc[i] + "  " + generateHistoricRateToDisplay(rate);
+            historicRates[i] = rate;
+            String toDisplay = Functions.timeLastUpdateUtc[i] + historicGapBetweenDateValue + generateHistoricRateToDisplay(rate);
 
             historicCurrLabel[i] = new JLabel(toDisplay);
             historicCurrLabel[i].setFont(historicCurrFontStyle);
-            historicCurrLabel[i].setBounds(xBase, 130 + gap*i, widgetWidth, widgetHeight);
+            historicCurrLabel[i].setBounds(xBase, 130 + gap*i, historicDataWidth, widgetHeight);
             frame.add(historicCurrLabel[i]);
-        }
 
+            historicImgArrow[i] = new JLabel();
+            historicImgArrow[i].setBounds(xBase+gapArrow, 130 + gap*i, widgetWidth, widgetHeight);
+            frame.add(historicImgArrow[i]);
+        }
+        updateHistoricArrows();
+        historicImgArrow[4].setIcon(iconHyphen);
         frame.setVisible(true);
 
 
+    }
+
+    static void updateHistoricArrows() {
+
+        for (int i = 0; i<historicRates.length-1; i++) {
+            if (historicRates[i] > historicRates[i + 1]) {
+                historicImgArrow[i].setIcon(iconDown);
+            }
+            else if ((historicRates[i] < historicRates[i + 1])) {
+                historicImgArrow[i].setIcon(iconUp);
+            }
+            else {
+                historicImgArrow[i].setIcon(iconHyphen);
+            }
+        }
     }
 
 
@@ -199,10 +246,10 @@ public class UI {
 
     static String generateHistoricRateToDisplay(double rate) {
         if (rate >= 1 && rate < 10_000) {
-            return customFormat("###,###.00", rate);
+            return customFormat("###,###.000", rate);
         }
-        else if (rate > 0.000_01) {
-            return customFormat("#.######", rate);
+        else if (rate > 0.000_001) {
+            return customFormat("#.########", rate);
         }
         else {
             return decFormat.format(rate);
@@ -215,7 +262,8 @@ public class UI {
         for (int i = 0; i<5; i++) {
 
             double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
-            String toDisplay = Functions.timeLastUpdateUtc[i] + generateHistoricRateToDisplay(rate);
+            historicRates[i] = rate;
+            String toDisplay = Functions.timeLastUpdateUtc[i] + historicGapBetweenDateValue + generateHistoricRateToDisplay(rate);
             historicCurrLabel[i].setText(toDisplay);
         }
     }
