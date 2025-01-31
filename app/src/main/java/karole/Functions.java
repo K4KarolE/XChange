@@ -30,6 +30,9 @@ public class Functions {
     static double[] ratesTo = new double[5];
     static String[] timeLastUpdateUtc = new String[5];
 
+    static int nextApiUpdateUnixJson;
+    static int nextApiUpdateUnixApiResponse;
+
 
     static void generateNodesFromJsons() {
         for (int i = 0; i < 5; i++) {
@@ -93,14 +96,15 @@ public class Functions {
 
     public static boolean canGetNewApiRequest() {
         int currentTime = (int)Instant.now().getEpochSecond();
-        int nextApiUpdate =  jsonNodes[0].get("time_next_update_unix").asInt();
-        return currentTime > nextApiUpdate;
+        nextApiUpdateUnixJson =  jsonNodes[0].get("time_next_update_unix").asInt();
+        return currentTime > nextApiUpdateUnixJson;
     }
 
 
     public static boolean isResponseValid() {
         String result = jsonNodeApiResponse.get("result").asText();
-        return result.equals("success");
+        nextApiUpdateUnixApiResponse = jsonNodeApiResponse.get("time_next_update_unix").asInt();
+        return result.equals("success") && nextApiUpdateUnixApiResponse > nextApiUpdateUnixJson;
     }
 
 
