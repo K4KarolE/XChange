@@ -4,9 +4,9 @@
   "documentation" : "https://www.exchangerate-api.com/docs/free",
   "terms_of_use" : "https://www.exchangerate-api.com/terms",
   "time_last_update_unix" : 1738627351,
-  "time_last_update_utc" : "Tue, 03 Feb 2025 00:02:31 +0000",
+  "time_last_update_utc" : "Tue, 01 Feb 2025 00:02:31 +0000",
   "time_next_update_unix" : 1738714381,
-  "time_next_update_utc" : "Wed, 04 Feb 2025 00:13:01 +0000",
+  "time_next_update_utc" : "Wed, 02 Feb 2025 00:13:01 +0000",
   "time_eol_unix" : 0,
   "base_code" : "USD",
   "rates" : {

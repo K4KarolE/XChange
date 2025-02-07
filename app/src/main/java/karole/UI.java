@@ -41,17 +41,18 @@ public class UI {
     static Font historicCurrFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
 
     static String historicGapBetweenDateValue = ("     ");
-    static Double[] historicRates = new Double[5];
+    static int historicJsonAmount = Functions.historicJsonAmount;
+    static Double[] historicRates = new Double[historicJsonAmount];
     
     static String workingDir = Path.of("").toAbsolutePath().toString();
     static String imgPathWindowIcon = workingDir + "/app/src/main/resources/frame_icon.png";
-    static JLabel[] historicCurrLabel = new JLabel[5];
+    static JLabel[] historicCurrLabel = new JLabel[historicJsonAmount];
 
 
     // Arrows or hyphen between the
     // historic date and rates
     static int imgSizeArrows = 15;
-    static JLabel[] historicImgArrow = new JLabel[5];
+    static JLabel[] historicImgArrow = new JLabel[historicJsonAmount];
     static ImageIcon generateIcon(String imgName) {
         String filePath = workingDir + "/app/src/main/resources/" + imgName+ ".png";
         ImageIcon iconRaw = new ImageIcon(filePath);
@@ -175,7 +176,7 @@ public class UI {
 
 
     
-        for (int i = 0; i<5; i++) {
+        for (int i = 0; i<historicJsonAmount; i++) {
 
             int gap = 30;
             int gapArrow = 100;
@@ -193,7 +194,8 @@ public class UI {
             frame.add(historicImgArrow[i]);
         }
         updateHistoricArrows();
-        historicImgArrow[4].setIcon(iconHyphen);
+        // no comparison indicator(arrow image) for the last rate
+        historicImgArrow[historicJsonAmount-1].setIcon(iconHyphen);
         frame.setVisible(true);
 
 
@@ -259,7 +261,7 @@ public class UI {
 
     static void updateHistoricCurrLabels() {
 
-        for (int i = 0; i<5; i++) {
+        for (int i = 0; i<historicJsonAmount; i++) {
 
             double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
             historicRates[i] = rate;

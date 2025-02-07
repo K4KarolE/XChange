@@ -24,18 +24,19 @@ public class Functions {
     static ObjectNode LastUsedCurrenciesObjectNode;
     static ObjectMapper objectMapper = new ObjectMapper();
 
-    static File[] jsonFiles = new File[5];
-    static JsonNode[] jsonNodes = new JsonNode[5];
-    static double[] ratesFrom = new double[5];
-    static double[] ratesTo = new double[5];
-    static String[] timeLastUpdateUtc = new String[5];
+    static int historicJsonAmount = 7;
+    static File[] jsonFiles = new File[historicJsonAmount];
+    static JsonNode[] jsonNodes = new JsonNode[historicJsonAmount];
+    static double[] ratesFrom = new double[historicJsonAmount];
+    static double[] ratesTo = new double[historicJsonAmount];
+    static String[] timeLastUpdateUtc = new String[historicJsonAmount];
 
     static int nextApiUpdateUnixJson;
     static int nextApiUpdateUnixApiResponse;
 
 
     static void generateNodesFromJsons() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < historicJsonAmount; i++) {
             String jsonPath = "./app/src/main/resources/apiResponse" + i  + ".json";    
             jsonFiles[i] = new File(jsonPath);
             try {
@@ -46,7 +47,7 @@ public class Functions {
 
 
     static void generateRatesFromNodes() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < historicJsonAmount; i++) {
             ratesFrom[i] = jsonNodes[i].get("rates").get(lastUsedCurrFrom).asDouble();
             ratesTo[i] = jsonNodes[i].get("rates").get(lastUsedCurrTo).asDouble();
         }
@@ -54,7 +55,7 @@ public class Functions {
 
 
     static void generateHistoricDatesFromNodes() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < historicJsonAmount; i++) {
             String utc = jsonNodes[i].get("time_last_update_utc").asText();   
             String utcToAdd = utc.substring(4,7)+
                 "/"+
@@ -95,8 +96,10 @@ public class Functions {
 
 
     public static boolean canGetNewApiRequest() {
+        // 3600: after passing the "time_next_update_unix" the latest
+        // update/json not provided immediately hence +1hr delay
         int currentTime = (int)Instant.now().getEpochSecond();
-        nextApiUpdateUnixJson =  jsonNodes[0].get("time_next_update_unix").asInt();
+        nextApiUpdateUnixJson =  jsonNodes[0].get("time_next_update_unix").asInt() + 3600;
         return currentTime > nextApiUpdateUnixJson;
     }
 
