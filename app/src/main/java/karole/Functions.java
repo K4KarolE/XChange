@@ -3,6 +3,8 @@ package karole;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,14 +36,17 @@ public class Functions {
     static int nextApiUpdateUnixJson;
     static int nextApiUpdateUnixApiResponse;
 
+    static Logger logger = LogToFile.logger;
+
 
     static void generateNodesFromJsons() {
         for (int i = 0; i < historicJsonAmount; i++) {
             String jsonPath = "./app/src/main/resources/apiResponse" + i  + ".json";    
             jsonFiles[i] = new File(jsonPath);
+            logger.info(jsonPath);
             try {
                 jsonNodes[i] = objectMapper.readTree(jsonFiles[i]);
-            } catch (IOException e) {System.out.println("ERROR: Read tree-file");}
+            } catch (IOException e) {logger.log(Level.WARNING,"Read tree-file");}
         } 
     }
 
@@ -64,6 +69,7 @@ public class Functions {
                 utc.substring(14,16)+
                 ": ";
             timeLastUpdateUtc[i] = utcToAdd;
+            logger.info(utc + " >> " + utcToAdd);
         }
     }
 
@@ -71,11 +77,12 @@ public class Functions {
     static void generateLastUsedCurrencies() {
         try {
             jsonNodeLastUsedCurrencies = objectMapper.readTree(jsonFileLastUsedCurrencies);
-        } catch (IOException e) {System.out.println("ERROR: Read tree-file");}
+        } catch (IOException e) {logger.log(Level.WARNING, "Read tree-file");}
         lastUsedCurrFrom = jsonNodeLastUsedCurrencies.get("from").asText();
         lastUsedCurrTo = jsonNodeLastUsedCurrencies.get("to").asText();
         lastUsedCurrFromIndex = jsonNodeLastUsedCurrencies.get("from_index").asInt();
         lastUsedCurrToIndex = jsonNodeLastUsedCurrencies.get("to_index").asInt();
+        logger.info("Generated");
     }
 
 
@@ -88,47 +95,54 @@ public class Functions {
 
         try {
             objectMapper.writeValue(jsonFileLastUsedCurrencies, LastUsedCurrenciesObjectNode);
-        }
-        catch (Exception e) {System.out.println(
-                "ERROR: Could not write selected currencies to JSON file.");
+            logger.info("Saved");
+        } catch (Exception e) {
+            logger.log(Level.WARNING,"Could not write selected currencies to JSON file.");
         }
     }
-
 
     public static boolean canGetNewApiRequest() {
         // 3600: after passing the "time_next_update_unix" the latest
         // update/json not provided immediately hence +1hr delay
         int currentTime = (int)Instant.now().getEpochSecond();
         nextApiUpdateUnixJson =  jsonNodes[0].get("time_next_update_unix").asInt() + 3600;
-        return currentTime > nextApiUpdateUnixJson;
+        boolean result = currentTime > nextApiUpdateUnixJson;
+        logger.info(Boolean.toString(result));
+        return result;
     }
 
 
     public static boolean isResponseValid() {
-        String result = jsonNodeApiResponse.get("result").asText();
+        String jsonResult = jsonNodeApiResponse.get("result").asText();
         nextApiUpdateUnixApiResponse = jsonNodeApiResponse.get("time_next_update_unix").asInt();
-        return result.equals("success") && nextApiUpdateUnixApiResponse > nextApiUpdateUnixJson;
+        boolean result = jsonResult.equals("success") && nextApiUpdateUnixApiResponse > nextApiUpdateUnixJson;
+        logger.info(Boolean.toString(result));
+        return result;
     }
 
 
+
     static void reallocateAndWriteNodesToJson() {
-        // Update (nodes/jsons)[1-4]
-        for (int i=3; i > -1; i--) {
+        // Update (nodes/jsons)[1-6]
+        for (int i=historicJsonAmount-2; i > -1; i--) {
             jsonNodes[i+1] = jsonNodes[i];
             try {
                 objectMapper.writeValue(jsonFiles[i+1], jsonNodes[i+1]);
+                logger.info("Json: " + Integer.toString(i) + " >> " + Integer.toString(i+1));
             }
-            catch (Exception e) {System.out.println(
-                "ERROR: Could not reallocate previous Json files."
-                );}
+            catch (Exception e) {
+                logger.log(Level.WARNING, "Could not reallocate previous Json files.");
+            }
         }
 
         // Update (node/json)[0]
         try {
             jsonNodes[0] = jsonNodeApiResponse;
             objectMapper.writeValue(jsonFiles[0], jsonNodeApiResponse);
+            logger.info("Json: new >> 0");
         }
-        catch (Exception e) {System.out.println("ERROR: Could not write API response to file.");
+        catch (Exception e) {
+            logger.log(Level.WARNING, "Could not write API response to file.");
         }
     }
 
@@ -143,6 +157,7 @@ public class Functions {
          *  - Reallocating the previous JSONs
          *  Generating rates, dates
          */
+        logger.info("appStartsGroupedActions(): START");
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         generateNodesFromJsons();
@@ -153,11 +168,12 @@ public class Functions {
                 reallocateAndWriteNodesToJson();
             }
             else {
-                System.out.println("ERROR: No API response received.");
+                logger.log(Level.WARNING,"No API response received.");
             }
         }
 
         generateRatesFromNodes();
         generateHistoricDatesFromNodes();
+        logger.info("appStartsGroupedActions(): FINISH");
     }
 }

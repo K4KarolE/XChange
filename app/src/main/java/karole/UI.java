@@ -68,6 +68,7 @@ public class UI {
 
     static void generateWindow() {
 
+        LogToFile.createLogger();
         Functions.generateLastUsedCurrencies();
         Functions.appStartsGroupedActions();
 
@@ -204,10 +205,10 @@ public class UI {
     static void updateHistoricArrows() {
 
         for (int i = 0; i<historicRates.length-1; i++) {
-            if (historicRates[i] > historicRates[i + 1]) {
+            if (historicRates[i] < historicRates[i + 1]) {
                 historicImgArrow[i].setIcon(iconDown);
             }
-            else if ((historicRates[i] < historicRates[i + 1])) {
+            else if ((historicRates[i] > historicRates[i + 1])) {
                 historicImgArrow[i].setIcon(iconUp);
             }
             else {
