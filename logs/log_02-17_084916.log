@@ -1,0 +1,38 @@
+Feb 17, 2025 8:49:16 AM karole.LogToFile createLogger
+INFO: Logger created
+Feb 17, 2025 8:49:16 AM karole.Functions generateLastUsedCurrencies
+INFO: Generated
+Feb 17, 2025 8:49:16 AM karole.Functions appStartsGroupedActions
+INFO: appStartsGroupedActions(): START
+Feb 17, 2025 8:49:16 AM karole.Functions generateNodesFromJsons
+INFO: ./app/src/main/resources/apiResponse0.json
+Feb 17, 2025 8:49:16 AM karole.Functions generateNodesFromJsons
+INFO: ./app/src/main/resources/apiResponse1.json
+Feb 17, 2025 8:49:16 AM karole.Functions generateNodesFromJsons
+INFO: ./app/src/main/resources/apiResponse2.json
+Feb 17, 2025 8:49:16 AM karole.Functions generateNodesFromJsons
+INFO: ./app/src/main/resources/apiResponse3.json
+Feb 17, 2025 8:49:16 AM karole.Functions generateNodesFromJsons
+INFO: ./app/src/main/resources/apiResponse4.json
+Feb 17, 2025 8:49:16 AM karole.Functions generateNodesFromJsons
+INFO: ./app/src/main/resources/apiResponse5.json
+Feb 17, 2025 8:49:16 AM karole.Functions generateNodesFromJsons
+INFO: ./app/src/main/resources/apiResponse6.json
+Feb 17, 2025 8:49:16 AM karole.Functions canGetNewApiRequest
+INFO: false
+Feb 17, 2025 8:49:16 AM karole.Functions generateHistoricDatesFromNodes
+INFO: Mon, 17 Feb 2025 00:02:31 +0000 >>  17/Feb/25: 
+Feb 17, 2025 8:49:16 AM karole.Functions generateHistoricDatesFromNodes
+INFO: Sun, 16 Feb 2025 00:02:32 +0000 >>  16/Feb/25: 
+Feb 17, 2025 8:49:16 AM karole.Functions generateHistoricDatesFromNodes
+INFO: Sun, 16 Feb 2025 00:02:32 +0000 >>  16/Feb/25: 
+Feb 17, 2025 8:49:16 AM karole.Functions generateHistoricDatesFromNodes
+INFO: Sat, 15 Feb 2025 00:02:31 +0000 >>  15/Feb/25: 
+Feb 17, 2025 8:49:16 AM karole.Functions generateHistoricDatesFromNodes
+INFO: Fri, 14 Feb 2025 00:02:32 +0000 >>  14/Feb/25: 
+Feb 17, 2025 8:49:16 AM karole.Functions generateHistoricDatesFromNodes
+INFO: Thu, 13 Feb 2025 00:02:32 +0000 >>  13/Feb/25: 
+Feb 17, 2025 8:49:16 AM karole.Functions generateHistoricDatesFromNodes
+INFO: Wed, 12 Feb 2025 00:02:31 +0000 >>  12/Feb/25: 
+Feb 17, 2025 8:49:16 AM karole.Functions appStartsGroupedActions
+INFO: appStartsGroupedActions(): FINISH
