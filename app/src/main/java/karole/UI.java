@@ -18,6 +18,13 @@ import java.util.Arrays;
 
 import static java.lang.Math.abs;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 public class UI {
 
     static JFrame frame = new JFrame();
@@ -48,6 +55,27 @@ public class UI {
     static String imgPathWindowIcon = workingDir + "/app/src/main/resources/frame_icon.png";
     static JLabel[] historicCurrLabel = new JLabel[historicJsonAmount];
 
+    static JFreeChart chart;
+    static DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+    static void createChart() {
+        chart = ChartFactory.createLineChart(
+                "",
+                "",
+                "",
+                dataset);
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setBounds(300,130, 450, 350);
+
+        // Make the "Y" values dataset dependent
+        // Cheers lads: https://stackoverflow.com/questions/57544667/jfreechart-rangeaxis-autorange-and-dont-start-from-0
+        CategoryPlot categoryPlot = (CategoryPlot) chart.getPlot();
+        ((NumberAxis)categoryPlot.getRangeAxis()).setAutoRangeIncludesZero(false);
+
+        frame.add(chartPanel);
+    }
+
 
     // Arrows or hyphen between the
     // historic date and rates
@@ -71,6 +99,7 @@ public class UI {
         LogToFile.createLogger();
         Functions.generateLastUsedCurrencies();
         Functions.appStartsGroupedActions();
+        createChart();
 
 
         // COMBO BOX OPTIONS CREATION
@@ -85,8 +114,8 @@ public class UI {
 
         // FRAME
         Image icon = Toolkit.getDefaultToolkit().getImage(imgPathWindowIcon);
-        int frameWidth = 600;
-        int frameHeight = 500;
+        int frameWidth = 800;
+        int frameHeight = 600;
         frame.setIconImage(icon);
         frame.setTitle("XChange");
         frame.setLayout(null);
@@ -194,13 +223,23 @@ public class UI {
             historicImgArrow[i].setBounds(xBase+gapArrow, 130 + gap*i, widgetWidth, widgetHeight);
             frame.add(historicImgArrow[i]);
         }
+
+        addHistoricRatesToChart();
         updateHistoricArrows();
         // no comparison indicator(arrow image) for the last rate
         historicImgArrow[historicJsonAmount-1].setIcon(iconHyphen);
         frame.setVisible(true);
-
-
     }
+
+
+    static void addHistoricRatesToChart() {
+        dataset.clear();
+        String rowKey = Functions.lastUsedCurrTo + " / " + Functions.lastUsedCurrFrom;
+        for (int i = historicJsonAmount-1; i>-1; i--) {
+            dataset.addValue(historicRates[i], rowKey, Functions.timeLastUpdateUtcChart[i]);
+        }
+    }
+
 
     static void updateHistoricArrows() {
 

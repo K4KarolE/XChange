@@ -32,6 +32,7 @@ public class Functions {
     static double[] ratesFrom = new double[historicJsonAmount];
     static double[] ratesTo = new double[historicJsonAmount];
     static String[] timeLastUpdateUtc = new String[historicJsonAmount];
+    static String[] timeLastUpdateUtcChart = new String[historicJsonAmount];
 
     static int nextApiUpdateUnixJson;
     static int nextApiUpdateUnixApiResponse;
@@ -61,15 +62,17 @@ public class Functions {
 
     static void generateHistoricDatesFromNodes() {
         for (int i = 0; i < historicJsonAmount; i++) {
-            String utc = jsonNodes[i].get("time_last_update_utc").asText();   
-            String utcToAdd = utc.substring(4,7)+
-                "/"+
-                utc.substring(8,11)+
+            String utc = jsonNodes[i].get("time_last_update_utc").asText();
+            String utcToChart = utc.substring(4,7)+
+                    "/"+
+                    utc.substring(8,11);
+            String utcToHistoric = utcToChart+
                 "/"+
                 utc.substring(14,16)+
                 ": ";
-            timeLastUpdateUtc[i] = utcToAdd;
-            logger.info(utc + " >> " + utcToAdd);
+            timeLastUpdateUtcChart[i] = utcToChart;
+            timeLastUpdateUtc[i] = utcToHistoric;
+            logger.info(utc + " >> " + utcToHistoric);
         }
     }
 
