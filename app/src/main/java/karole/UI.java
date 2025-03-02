@@ -4,12 +4,9 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Toolkit;
-import java.awt.Image;
-import java.awt.Component;
-import java.awt.Font;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -47,16 +44,22 @@ public class UI {
     static Font insertFieldFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
     static Font historicCurrFontStyle = new Font("Times New Roman", Font.PLAIN, 18);
 
-    static String historicGapBetweenDateValue = ("     ");
     static int historicJsonAmount = Functions.historicJsonAmount;
     static Double[] historicRates = new Double[historicJsonAmount];
     
     static String workingDir = Path.of("").toAbsolutePath().toString();
     static String imgPathWindowIcon = workingDir + "/app/src/main/resources/frame_icon.png";
-    static JLabel[] historicCurrLabel = new JLabel[historicJsonAmount];
+
+    static JLabel historicDateLabel = new JLabel();
+    static JLabel[] historicRateLabel = new JLabel[historicJsonAmount];
 
     static JFreeChart chart;
     static DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+    static Color frameBGColor = new Color(50,50,50);
+    static Color chartInsideBGColor = new Color(60,60,60);
+    static Color chartOutsideBGColor = frameBGColor;
+    static Color appFontColor = new Color (230,230,230);
 
     static void createChart() {
         chart = ChartFactory.createLineChart(
@@ -64,14 +67,21 @@ public class UI {
                 "",
                 "",
                 dataset);
+        chart.setBackgroundPaint(chartOutsideBGColor);
+        // Legend - Example: HUF / GBP
+        chart.getLegend().setBackgroundPaint(frameBGColor);
+        chart.getLegend().setItemPaint(appFontColor);
 
         ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setBounds(300,130, 450, 350);
+        chartPanel.setBounds(300,130-5, 480, 350);
 
         // Make the "Y" values dataset dependent
-        // Cheers lads: https://stackoverflow.com/questions/57544667/jfreechart-rangeaxis-autorange-and-dont-start-from-0
+        // Cheers lads: https://stackoverflow.com/q/57544667
         CategoryPlot categoryPlot = (CategoryPlot) chart.getPlot();
         ((NumberAxis)categoryPlot.getRangeAxis()).setAutoRangeIncludesZero(false);
+        categoryPlot.getRangeAxis().setTickLabelPaint(appFontColor); // Y axis
+        categoryPlot.getDomainAxis().setTickLabelPaint(appFontColor);   // X axis
+        categoryPlot.setBackgroundPaint(chartInsideBGColor);
 
         frame.add(chartPanel);
     }
@@ -114,8 +124,8 @@ public class UI {
 
         // FRAME
         Image icon = Toolkit.getDefaultToolkit().getImage(imgPathWindowIcon);
-        int frameWidth = 800;
-        int frameHeight = 600;
+        int frameWidth = 810;
+        int frameHeight = 550;
         frame.setIconImage(icon);
         frame.setTitle("XChange");
         frame.setLayout(null);
@@ -123,6 +133,7 @@ public class UI {
         frame.getContentPane().setBackground(new java.awt.Color(243, 243, 243));
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().setBackground(frameBGColor);
 
 
         insertField.setFont(insertFieldFontStyle);
@@ -154,7 +165,7 @@ public class UI {
                 Functions.saveLastUsedCurrenciesJson();
                 Functions.generateRatesFromNodes();
                 updateResultAction();
-                updateHistoricCurrLabels();
+                updateHistoricRateLabels();
                 updateHistoricArrows();
             }
         });
@@ -168,13 +179,14 @@ public class UI {
                 Functions.saveLastUsedCurrenciesJson();
                 Functions.generateRatesFromNodes();
                 updateResultAction();
-                updateHistoricCurrLabels();
+                updateHistoricRateLabels();
                 updateHistoricArrows();
             }
         });
 
 
         label_result.setFont(resultValueFontStyle);
+        label_result.setForeground(appFontColor);
         updateResultAction();
 
         int widgetWidth = 180;
@@ -208,16 +220,23 @@ public class UI {
     
         for (int i = 0; i<historicJsonAmount; i++) {
 
-            int gap = 30;
-            int gapArrow = 100;
+            int gap = 41;
+            int gapArrow = 105;
+            int gapRate = 125;
             double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
             historicRates[i] = rate;
-            String toDisplay = Functions.timeLastUpdateUtc[i] + historicGapBetweenDateValue + generateHistoricRateToDisplay(rate);
 
-            historicCurrLabel[i] = new JLabel(toDisplay);
-            historicCurrLabel[i].setFont(historicCurrFontStyle);
-            historicCurrLabel[i].setBounds(xBase, 130 + gap*i, historicDataWidth, widgetHeight);
-            frame.add(historicCurrLabel[i]);
+            historicDateLabel = new JLabel(Functions.timeLastUpdateUtc[i]);
+            historicDateLabel.setFont(historicCurrFontStyle);
+            historicDateLabel.setForeground(appFontColor);
+            historicDateLabel.setBounds(xBase, 130 + gap*i, historicDataWidth, widgetHeight);
+            frame.add(historicDateLabel);
+
+            historicRateLabel[i] = new JLabel(generateHistoricRateToDisplay(rate));
+            historicRateLabel[i].setFont(historicCurrFontStyle);
+            historicRateLabel[i].setForeground(appFontColor);
+            historicRateLabel[i].setBounds(xBase+gapRate, 130 + gap*i, historicDataWidth, widgetHeight);
+            frame.add(historicRateLabel[i]);
 
             historicImgArrow[i] = new JLabel();
             historicImgArrow[i].setBounds(xBase+gapArrow, 130 + gap*i, widgetWidth, widgetHeight);
@@ -299,14 +318,13 @@ public class UI {
     }
 
 
-    static void updateHistoricCurrLabels() {
+    static void updateHistoricRateLabels() {
 
         for (int i = 0; i<historicJsonAmount; i++) {
 
             double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
             historicRates[i] = rate;
-            String toDisplay = Functions.timeLastUpdateUtc[i] + historicGapBetweenDateValue + generateHistoricRateToDisplay(rate);
-            historicCurrLabel[i].setText(toDisplay);
+            historicRateLabel[i].setText(generateHistoricRateToDisplay(rate));
         }
     }
 
