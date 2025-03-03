@@ -26,12 +26,14 @@ public class UI {
 
     static JFrame frame = new JFrame();
     static JTextField insertField = new JTextField();
-    static JLabel label_result = new JLabel();
-    
+    static JLabel resultLabel = new JLabel();
+    static JLabel apiUrlLabel = new JLabel();
+
     static HashMap<String,String> mapCurrency = CurrencyMap.createCurrencyMap();
 
-    static JComboBox<String> combo_box_unit_from;
-    static JComboBox<String> combo_box_unit_to;
+    static JComboBox<String> comboBoxUnitFrom;
+    static JComboBox<String> comboBoxUnitTo;
+
 
     static String selectedComboBoxFrom;
     static String selectedComboBoxTo;
@@ -60,6 +62,7 @@ public class UI {
     static Color chartInsideBGColor = new Color(60,60,60);
     static Color chartOutsideBGColor = frameBGColor;
     static Color appFontColor = new Color (230,230,230);
+    static Color apiUrlLabelColor = new Color (100,100,100);
 
     static void createChart() {
         chart = ChartFactory.createLineChart(
@@ -125,7 +128,7 @@ public class UI {
         // FRAME
         Image icon = Toolkit.getDefaultToolkit().getImage(imgPathWindowIcon);
         int frameWidth = 810;
-        int frameHeight = 550;
+        int frameHeight = 530;
         frame.setIconImage(icon);
         frame.setTitle("XChange");
         frame.setLayout(null);
@@ -156,9 +159,9 @@ public class UI {
 
 
 
-        combo_box_unit_to = new JComboBox<>(combo_box_options);
-        combo_box_unit_to.setSelectedIndex(Functions.lastUsedCurrToIndex);
-        combo_box_unit_to.addActionListener(new ActionListener() {
+        comboBoxUnitTo = new JComboBox<>(combo_box_options);
+        comboBoxUnitTo.setSelectedIndex(Functions.lastUsedCurrToIndex);
+        comboBoxUnitTo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateLastUsedCurrs();
@@ -167,12 +170,13 @@ public class UI {
                 updateResultAction();
                 updateHistoricRateLabels();
                 updateHistoricArrows();
+                updateChart();
             }
         });
             
-        combo_box_unit_from = new JComboBox<>(combo_box_options);
-        combo_box_unit_from.setSelectedIndex(Functions.lastUsedCurrFromIndex);
-        combo_box_unit_from.addActionListener(new ActionListener() {
+        comboBoxUnitFrom = new JComboBox<>(combo_box_options);
+        comboBoxUnitFrom.setSelectedIndex(Functions.lastUsedCurrFromIndex);
+        comboBoxUnitFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateLastUsedCurrs();
@@ -181,13 +185,18 @@ public class UI {
                 updateResultAction();
                 updateHistoricRateLabels();
                 updateHistoricArrows();
+                updateChart();
             }
         });
 
 
-        label_result.setFont(resultValueFontStyle);
-        label_result.setForeground(appFontColor);
+        resultLabel.setFont(resultValueFontStyle);
+        resultLabel.setForeground(appFontColor);
         updateResultAction();
+
+        apiUrlLabel.setText("https://www.exchangerate-api.com");
+        apiUrlLabel.setForeground(apiUrlLabelColor);
+
 
         int widgetWidth = 180;
         int historicDataWidth = 210;
@@ -201,15 +210,17 @@ public class UI {
 
 
         insertField.setBounds(xBase, yBase, insertFieldWidth, widgetHeight + 2);
-        combo_box_unit_from.setBounds(xUnitFromCB, yBase, widgetWidth,widgetHeight);
-        combo_box_unit_to.setBounds(xUnitToCB, yBase, widgetWidth,widgetHeight);
-        label_result.setBounds(xBase + 2, yBase + widgetHeight, frameWidth-xBase*2, widgetHeight);
+        comboBoxUnitFrom.setBounds(xUnitFromCB, yBase, widgetWidth,widgetHeight);
+        comboBoxUnitTo.setBounds(xUnitToCB, yBase, widgetWidth,widgetHeight);
+        resultLabel.setBounds(xBase + 2, yBase+widgetHeight+5, frameWidth-xBase*2, widgetHeight);
+        apiUrlLabel.setBounds(xBase-20, frameHeight-70, 300, widgetHeight);
 
         Component[] widgets_array = {
-            label_result,
+                resultLabel,
             insertField,
-            combo_box_unit_from,
-            combo_box_unit_to,
+                comboBoxUnitFrom,
+                comboBoxUnitTo,
+            apiUrlLabel
         };
 
         for (Component widget : widgets_array) {
@@ -229,7 +240,7 @@ public class UI {
             historicDateLabel = new JLabel(Functions.timeLastUpdateUtc[i]);
             historicDateLabel.setFont(historicCurrFontStyle);
             historicDateLabel.setForeground(appFontColor);
-            historicDateLabel.setBounds(xBase, 130 + gap*i, historicDataWidth, widgetHeight);
+            historicDateLabel.setBounds(xBase-3, 130 + gap*i, historicDataWidth, widgetHeight);
             frame.add(historicDateLabel);
 
             historicRateLabel[i] = new JLabel(generateHistoricRateToDisplay(rate));
@@ -252,11 +263,17 @@ public class UI {
 
 
     static void addHistoricRatesToChart() {
-        dataset.clear();
         String rowKey = Functions.lastUsedCurrTo + " / " + Functions.lastUsedCurrFrom;
         for (int i = historicJsonAmount-1; i>-1; i--) {
             dataset.addValue(historicRates[i], rowKey, Functions.timeLastUpdateUtcChart[i]);
         }
+    }
+
+
+    static void updateChart() {
+        dataset.clear();
+        addHistoricRatesToChart();
+        chart.fireChartChanged();
     }
 
 
@@ -277,12 +294,12 @@ public class UI {
 
 
     static void updateLastUsedCurrs() {
-        selectedComboBoxFrom = combo_box_unit_from.getSelectedItem().toString();
-        selectedComboBoxTo = combo_box_unit_to.getSelectedItem().toString();
+        selectedComboBoxFrom = comboBoxUnitFrom.getSelectedItem().toString();
+        selectedComboBoxTo = comboBoxUnitTo.getSelectedItem().toString();
         Functions.lastUsedCurrFrom = mapCurrency.get(selectedComboBoxFrom);
         Functions.lastUsedCurrTo = mapCurrency.get(selectedComboBoxTo);
-        Functions.lastUsedCurrFromIndex = combo_box_unit_from.getSelectedIndex();
-        Functions.lastUsedCurrToIndex = combo_box_unit_to.getSelectedIndex();
+        Functions.lastUsedCurrFromIndex = comboBoxUnitFrom.getSelectedIndex();
+        Functions.lastUsedCurrToIndex = comboBoxUnitTo.getSelectedIndex();
     }
 
 
@@ -340,18 +357,18 @@ public class UI {
             try {
                 fieldValueFrom = abs(Double.parseDouble(insertFieldText));
             } catch (NumberFormatException e) {
-                System.out.println("Invaild value!");
+                System.out.println("Invalid value!");
             }
 
             if (fieldValueFrom != null && fieldValueFrom != 0) {
                 resultValueRaw = fieldValueFrom / Functions.ratesFrom[0] * Functions.ratesTo[0];
-                label_result.setText(generateResultValueToDisplay(resultValueRaw) + "  " + Functions.lastUsedCurrTo);
+                resultLabel.setText(generateResultValueToDisplay(resultValueRaw) + "  " + Functions.lastUsedCurrTo);
             } else {
-                label_result.setText("0.0" + "  " + Functions.lastUsedCurrTo);
+                resultLabel.setText("0.0" + "  " + Functions.lastUsedCurrTo);
             }
         }
         else {
-            label_result.setText("0.0  " + Functions.lastUsedCurrTo);
+            resultLabel.setText("0.0  " + Functions.lastUsedCurrTo);
         }
         }
     }
