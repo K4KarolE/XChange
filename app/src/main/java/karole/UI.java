@@ -33,6 +33,8 @@ public class UI {
 
     static JComboBox<String> comboBoxUnitFrom;
     static JComboBox<String> comboBoxUnitTo;
+    static boolean comboBoxActionTriggered = true;
+    static JButton buttonSwitchCurrencies;
 
 
     static String selectedComboBoxFrom;
@@ -94,16 +96,16 @@ public class UI {
     // historic date and rates
     static int imgSizeArrows = 15;
     static JLabel[] historicImgArrow = new JLabel[historicJsonAmount];
-    static ImageIcon generateIcon(String imgName) {
+    static ImageIcon generateIcon(int imageSize, String imgName) {
         String filePath = workingDir + "/app/src/main/resources/" + imgName+ ".png";
         ImageIcon iconRaw = new ImageIcon(filePath);
         Image image = iconRaw.getImage();
-        Image newImage = image.getScaledInstance(imgSizeArrows, imgSizeArrows,  Image.SCALE_SMOOTH);
+        Image newImage = image.getScaledInstance(imageSize, imageSize,  Image.SCALE_SMOOTH);
         return new ImageIcon(newImage);
     }
-    static ImageIcon iconUp = generateIcon("arrow_up");
-    static ImageIcon iconDown = generateIcon("arrow_down");
-    static ImageIcon iconHyphen = generateIcon("arrow_hyphen");
+    static ImageIcon iconUp = generateIcon(imgSizeArrows, "arrow_up");
+    static ImageIcon iconDown = generateIcon(imgSizeArrows, "arrow_down");
+    static ImageIcon iconHyphen = generateIcon(imgSizeArrows, "arrow_hyphen");
 
 
 
@@ -164,13 +166,7 @@ public class UI {
         comboBoxUnitTo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateLastUsedCurrs();
-                Functions.saveLastUsedCurrenciesJson();
-                Functions.generateRatesFromNodes();
-                updateResultAction();
-                updateHistoricRateLabels();
-                updateHistoricArrows();
-                updateChart();
+                if (comboBoxActionTriggered) {comboBoxChangedAction();}
             }
         });
             
@@ -179,13 +175,7 @@ public class UI {
         comboBoxUnitFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateLastUsedCurrs();
-                Functions.saveLastUsedCurrenciesJson();
-                Functions.generateRatesFromNodes();
-                updateResultAction();
-                updateHistoricRateLabels();
-                updateHistoricArrows();
-                updateChart();
+                if (comboBoxActionTriggered) {comboBoxChangedAction();}
             }
         });
 
@@ -198,6 +188,26 @@ public class UI {
         apiUrlLabel.setForeground(apiUrlLabelColor);
 
 
+        buttonSwitchCurrencies = new JButton();
+        buttonSwitchCurrencies.setIcon(generateIcon(20, "button_switch"));
+        buttonSwitchCurrencies.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                comboBoxActionTriggered = false;
+                int unit_from_index = comboBoxUnitFrom.getSelectedIndex();
+                int unit_to_index = comboBoxUnitTo.getSelectedIndex();
+                comboBoxUnitFrom.setSelectedIndex(unit_to_index);
+                comboBoxUnitTo.setSelectedIndex(unit_from_index);
+                comboBoxChangedAction();
+                comboBoxActionTriggered = true;
+            }
+        });
+        // FLAT BUTTON
+        buttonSwitchCurrencies.setBorderPainted(false);
+        buttonSwitchCurrencies.setFocusPainted(false);
+        buttonSwitchCurrencies.setContentAreaFilled(false);
+
+
         int widgetWidth = 180;
         int historicDataWidth = 210;
         int widgetHeight = 30;
@@ -205,21 +215,24 @@ public class UI {
         int yBase = 40;
 
         int insertFieldWidth = 130;
-        int xUnitFromCB = xBase + insertFieldWidth + 10;
-        int xUnitToCB = xBase + (insertFieldWidth + 10) *2 + 50;
+        int xUnitFrom = xBase + insertFieldWidth + 10;
+        int xSwitchButton = xBase + (insertFieldWidth + 10) *2 + 55;
+        int xUnitTo = xSwitchButton + 35;
 
 
         insertField.setBounds(xBase, yBase, insertFieldWidth, widgetHeight + 2);
-        comboBoxUnitFrom.setBounds(xUnitFromCB, yBase, widgetWidth,widgetHeight);
-        comboBoxUnitTo.setBounds(xUnitToCB, yBase, widgetWidth,widgetHeight);
+        comboBoxUnitFrom.setBounds(xUnitFrom, yBase, widgetWidth, widgetHeight);
+        buttonSwitchCurrencies.setBounds(xSwitchButton, yBase, 20, widgetHeight);
+        comboBoxUnitTo.setBounds(xUnitTo, yBase, widgetWidth, widgetHeight);
         resultLabel.setBounds(xBase + 2, yBase+widgetHeight+5, frameWidth-xBase*2, widgetHeight);
         apiUrlLabel.setBounds(xBase-20, frameHeight-70, 300, widgetHeight);
 
         Component[] widgets_array = {
-                resultLabel,
+            resultLabel,
             insertField,
-                comboBoxUnitFrom,
-                comboBoxUnitTo,
+            comboBoxUnitFrom,
+            comboBoxUnitTo,
+            buttonSwitchCurrencies,
             apiUrlLabel
         };
 
@@ -259,6 +272,17 @@ public class UI {
         // no comparison indicator(arrow image) for the last rate
         historicImgArrow[historicJsonAmount-1].setIcon(iconHyphen);
         frame.setVisible(true);
+    }
+
+
+    static void comboBoxChangedAction() {
+            updateLastUsedCurrs();
+            Functions.saveLastUsedCurrenciesJson();
+            Functions.generateRatesFromNodes();
+            updateResultAction();
+            updateHistoricRateLabels();
+            updateHistoricArrows();
+            updateChart();
     }
 
 
