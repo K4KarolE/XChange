@@ -9,7 +9,7 @@ import java.util.logging.SimpleFormatter;
 
 public class LogToFile {
     // Cheers all!
-    // https://stackoverflow.com/questions/15758685/how-to-write-logs-in-text-file-when-using-java-util-logging-logger
+    // https://stackoverflow.com/q/15758685
 
     static Logger logger = Logger.getLogger("");
     static FileHandler fileHandler;
@@ -21,7 +21,6 @@ public class LogToFile {
             logger.addHandler(fileHandler);
             SimpleFormatter formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
-
             logger.info("Logger created");
 
         } catch (SecurityException e) {

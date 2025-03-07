@@ -36,7 +36,6 @@ public class UI {
     static boolean comboBoxActionTriggered = true;
     static JButton buttonSwitchCurrencies;
 
-
     static String selectedComboBoxFrom;
     static String selectedComboBoxTo;
     static Double fieldValueFrom;
@@ -66,6 +65,7 @@ public class UI {
     static Color appFontColor = new Color (230,230,230);
     static Color apiUrlLabelColor = new Color (100,100,100);
 
+
     static void createChart() {
         chart = ChartFactory.createLineChart(
                 "",
@@ -73,10 +73,8 @@ public class UI {
                 "",
                 dataset);
         chart.setBackgroundPaint(chartOutsideBGColor);
-        // Legend - Example: HUF / GBP
-        chart.getLegend().setBackgroundPaint(frameBGColor);
+        chart.getLegend().setBackgroundPaint(frameBGColor); // Legend - Example: HUF / GBP
         chart.getLegend().setItemPaint(appFontColor);
-
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setBounds(300,130-5, 480, 350);
 
@@ -92,7 +90,7 @@ public class UI {
     }
 
 
-    // Arrows or hyphen between the
+    // Arrow or hyphen icons between the
     // historic date and rates
     static int imgSizeArrows = 15;
     static JLabel[] historicImgArrow = new JLabel[historicJsonAmount];
@@ -144,6 +142,8 @@ public class UI {
         insertField.setFont(insertFieldFontStyle);
         insertField.setHorizontalAlignment(JTextField.RIGHT);
         insertField.setText("1");
+        insertField.setBackground(apiUrlLabelColor);
+        insertField.setForeground(appFontColor);
         insertField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -160,9 +160,10 @@ public class UI {
         });
 
 
-
         comboBoxUnitTo = new JComboBox<>(combo_box_options);
         comboBoxUnitTo.setSelectedIndex(Functions.lastUsedCurrToIndex);
+        comboBoxUnitTo.setBackground(apiUrlLabelColor);
+        comboBoxUnitTo.setForeground(appFontColor);
         comboBoxUnitTo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -172,6 +173,8 @@ public class UI {
             
         comboBoxUnitFrom = new JComboBox<>(combo_box_options);
         comboBoxUnitFrom.setSelectedIndex(Functions.lastUsedCurrFromIndex);
+        comboBoxUnitFrom.setBackground(apiUrlLabelColor);
+        comboBoxUnitFrom.setForeground(appFontColor);
         comboBoxUnitFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -190,6 +193,9 @@ public class UI {
 
         buttonSwitchCurrencies = new JButton();
         buttonSwitchCurrencies.setIcon(generateIcon(20, "button_switch"));
+        buttonSwitchCurrencies.setBorderPainted(false); // flat button
+        buttonSwitchCurrencies.setFocusPainted(false);  // flat button
+        buttonSwitchCurrencies.setContentAreaFilled(false); // flat button
         buttonSwitchCurrencies.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -202,25 +208,22 @@ public class UI {
                 comboBoxActionTriggered = true;
             }
         });
-        // FLAT BUTTON
-        buttonSwitchCurrencies.setBorderPainted(false);
-        buttonSwitchCurrencies.setFocusPainted(false);
-        buttonSwitchCurrencies.setContentAreaFilled(false);
+
 
 
         int widgetWidth = 180;
         int historicDataWidth = 210;
-        int widgetHeight = 30;
+        int widgetHeight = 32;
         int xBase = 40;
         int yBase = 40;
 
         int insertFieldWidth = 130;
         int xUnitFrom = xBase + insertFieldWidth + 10;
-        int xSwitchButton = xBase + (insertFieldWidth + 10) *2 + 55;
-        int xUnitTo = xSwitchButton + 35;
+        int xSwitchButton = xBase + (insertFieldWidth + 10) *2 + 50;
+        int xUnitTo = xSwitchButton + 30;
 
 
-        insertField.setBounds(xBase, yBase, insertFieldWidth, widgetHeight + 2);
+        insertField.setBounds(xBase, yBase, insertFieldWidth, widgetHeight);
         comboBoxUnitFrom.setBounds(xUnitFrom, yBase, widgetWidth, widgetHeight);
         buttonSwitchCurrencies.setBounds(xSwitchButton, yBase, 20, widgetHeight);
         comboBoxUnitTo.setBounds(xUnitTo, yBase, widgetWidth, widgetHeight);
@@ -241,9 +244,9 @@ public class UI {
         }
 
 
-    
-        for (int i = 0; i<historicJsonAmount; i++) {
-
+        // Historic section
+        // Date - image - rate
+        for (int i = 0; i < historicJsonAmount; i++) {
             int gap = 41;
             int gapArrow = 105;
             int gapRate = 125;
@@ -276,7 +279,7 @@ public class UI {
 
 
     static void comboBoxChangedAction() {
-            updateLastUsedCurrs();
+            updateLastUsedCurrencisVars();
             Functions.saveLastUsedCurrenciesJson();
             Functions.generateRatesFromNodes();
             updateResultAction();
@@ -302,7 +305,6 @@ public class UI {
 
 
     static void updateHistoricArrows() {
-
         for (int i = 0; i<historicRates.length-1; i++) {
             if (historicRates[i] < historicRates[i + 1]) {
                 historicImgArrow[i].setIcon(iconDown);
@@ -317,19 +319,13 @@ public class UI {
     }
 
 
-    static void updateLastUsedCurrs() {
+    static void updateLastUsedCurrencisVars() {
         selectedComboBoxFrom = comboBoxUnitFrom.getSelectedItem().toString();
         selectedComboBoxTo = comboBoxUnitTo.getSelectedItem().toString();
         Functions.lastUsedCurrFrom = mapCurrency.get(selectedComboBoxFrom);
         Functions.lastUsedCurrTo = mapCurrency.get(selectedComboBoxTo);
         Functions.lastUsedCurrFromIndex = comboBoxUnitFrom.getSelectedIndex();
         Functions.lastUsedCurrToIndex = comboBoxUnitTo.getSelectedIndex();
-    }
-
-
-    static String customFormat(String pattern, double value ) {
-        DecimalFormat myFormatter = new DecimalFormat(pattern);
-        return myFormatter.format(value);
     }
 
 
@@ -343,6 +339,11 @@ public class UI {
         else {
             return decFormat.format(resultValueRaw);
         }
+    }
+
+    static String customFormat(String pattern, double value ) {
+        DecimalFormat myFormatter = new DecimalFormat(pattern);
+        return myFormatter.format(value);
     }
 
 
@@ -360,9 +361,9 @@ public class UI {
 
 
     static void updateHistoricRateLabels() {
-
+        // Triggered by the currency changes:
+        // Combo boxes or switch currencies button
         for (int i = 0; i<historicJsonAmount; i++) {
-
             double rate = 1 / Functions.ratesFrom[i] * Functions.ratesTo[i];
             historicRates[i] = rate;
             historicRateLabel[i].setText(generateHistoricRateToDisplay(rate));
@@ -371,7 +372,10 @@ public class UI {
 
 
     static void updateResultAction() {
-
+        /* Updating the result label (152 USD >> 56,275 HUF)
+            triggered by the typing in the insert field
+            or the currency changes (combo boxes or switch curr. button)
+         */
        insertFieldText = insertField.getText().trim();
 
         if (!insertFieldText.isEmpty()) {
@@ -396,4 +400,3 @@ public class UI {
         }
         }
     }
-

@@ -104,6 +104,7 @@ public class Functions {
         }
     }
 
+
     public static boolean canGetNewApiRequest() {
         // 3600: after passing the "time_next_update_unix" the latest
         // update/json not provided immediately hence +1hr delay
@@ -124,20 +125,18 @@ public class Functions {
     }
 
 
-
     static void reallocateAndWriteNodesToJson() {
         // Update (nodes/jsons)[1-6]
         for (int i=historicJsonAmount-2; i > -1; i--) {
             jsonNodes[i+1] = jsonNodes[i];
             try {
                 objectMapper.writeValue(jsonFiles[i+1], jsonNodes[i+1]);
-                logger.info("Json: " + Integer.toString(i) + " >> " + Integer.toString(i+1));
+                logger.info("Json: " + i + " >> " + (i+1));
             }
             catch (Exception e) {
                 logger.log(Level.WARNING, "Could not reallocate previous Json files.");
             }
         }
-
         // Update (node/json)[0]
         try {
             jsonNodes[0] = jsonNodeApiResponse;
