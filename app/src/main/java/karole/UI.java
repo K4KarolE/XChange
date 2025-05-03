@@ -76,7 +76,7 @@ public class UI {
         chart.getLegend().setBackgroundPaint(frameBGColor); // Legend - Example: HUF / GBP
         chart.getLegend().setItemPaint(appFontColor);
         ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setBounds(300,130-5, 480, 350);
+        chartPanel.setBounds(300,130-5, 490, 350);
 
         // Make the "Y" values dataset dependent
         // Cheers lads: https://stackoverflow.com/q/57544667
